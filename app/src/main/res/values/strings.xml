@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Fragments</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="run_fragment_b">Run Fragment B</string>
+    <string name="not_implements_fragment_listener">Host activity doesn\'t implements FragmentListener</string>
+    <string name="not_implements_fragment_settable">Fragment doesn\'t implements FragmentSettable</string>
+</resources>
