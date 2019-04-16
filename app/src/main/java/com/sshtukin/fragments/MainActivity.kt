@@ -3,6 +3,7 @@ package com.sshtukin.fragments
 import android.content.res.Configuration
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import java.lang.RuntimeException
 
 /**
@@ -28,29 +29,32 @@ class MainActivity : AppCompatActivity(), FragmentListener{
         }
     }
 
+    private fun setFragment(holderId: Int,
+                            fragment: Fragment,
+                            backStack: Boolean = false){
+        val transaction =  supportFragmentManager.beginTransaction()
+        transaction.replace(holderId, fragment)
+        if (backStack){
+            transaction.addToBackStack(null)
+        }
+        transaction.commit()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         if (isPortrait()) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_holder, FragmentA())
-                .commitAllowingStateLoss()
-
+            setFragment(R.id.fragment_holder, FragmentA())
         }else{
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_holder_a, FragmentA())
-                .replace(R.id.fragment_holder_b, FragmentB.newInstance(counter.toString()))
-                .commitAllowingStateLoss()
+            setFragment(R.id.fragment_holder_a, FragmentA())
+            setFragment(R.id.fragment_holder_b, FragmentB.newInstance(counter.toString()))
         }
     }
 
     override fun onFragmentButtonClicked() {
         counter++
         if (isPortrait()){
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_holder, FragmentB.newInstance(counter.toString()))
-                .addToBackStack(null)
-                .commitAllowingStateLoss()
+            setFragment(R.id.fragment_holder, FragmentB.newInstance(counter.toString()), true)
         }else{
             setCount(R.id.fragment_holder_b)
         }
@@ -71,10 +75,7 @@ class MainActivity : AppCompatActivity(), FragmentListener{
         }
         else {
             if (isFragmentBWasCalled){
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_holder, FragmentB.newInstance(counter.toString()))
-                    .addToBackStack(null)
-                    .commitAllowingStateLoss()
+                setFragment(R.id.fragment_holder, FragmentB.newInstance(counter.toString()), true)
             }
         }
     }
