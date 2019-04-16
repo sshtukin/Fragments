@@ -14,6 +14,7 @@ import java.lang.RuntimeException
 class MainActivity : AppCompatActivity(), FragmentListener{
 
     private var counter = 0
+    private var isFragmentBWasCalled = false
 
     private fun isPortrait() = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
@@ -32,13 +33,14 @@ class MainActivity : AppCompatActivity(), FragmentListener{
         setContentView(R.layout.activity_main)
         if (isPortrait()) {
             supportFragmentManager.beginTransaction()
-                .add(R.id.fragment_holder, FragmentA())
-                .commit()
+                .replace(R.id.fragment_holder, FragmentA())
+                .commitAllowingStateLoss()
+
         }else{
             supportFragmentManager.beginTransaction()
-                .add(R.id.fragment_holder_a, FragmentA())
-                .add(R.id.fragment_holder_b, FragmentB())
-                .commit()
+                .replace(R.id.fragment_holder_a, FragmentA())
+                .replace(R.id.fragment_holder_b, FragmentB.newInstance(counter.toString()))
+                .commitAllowingStateLoss()
         }
     }
 
@@ -48,26 +50,43 @@ class MainActivity : AppCompatActivity(), FragmentListener{
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_holder, FragmentB.newInstance(counter.toString()))
                 .addToBackStack(null)
-                .commit()
+                .commitAllowingStateLoss()
         }else{
             setCount(R.id.fragment_holder_b)
         }
+        isFragmentBWasCalled = true
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        isFragmentBWasCalled = false
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
         counter = savedInstanceState?.getString(COUNTER_KEY)?.toInt()?: 0
+        isFragmentBWasCalled = savedInstanceState?.getBoolean(FRAGMENT_STATE)?: false
         if (!isPortrait()) {
            setCount(R.id.fragment_holder_b)
+        }
+        else {
+            if (isFragmentBWasCalled){
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_holder, FragmentB.newInstance(counter.toString()))
+                    .addToBackStack(null)
+                    .commitAllowingStateLoss()
+            }
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         outState?.putString(COUNTER_KEY, counter.toString())
+        outState?.putBoolean(FRAGMENT_STATE, isFragmentBWasCalled)
         super.onSaveInstanceState(outState)
     }
 
     private companion object {
         private val COUNTER_KEY = "1001"
+        private val FRAGMENT_STATE = "1003"
     }
 }
